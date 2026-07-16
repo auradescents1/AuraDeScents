@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura De Scents — Owner Dashboard</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Unified Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ====== TOAST CONTAINER ====== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ====== LOGIN OVERLAY ====== -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+      <p class="gold-text" style="font-size:0.75rem; letter-spacing:4px; text-transform:uppercase; margin-bottom:16px;">Owner Access</p>
+      <h2>Aura <span class="gold-text">Dashboard</span></h2>
+      <div class="gold-line"></div>
+      <p class="login-sub">Enter your credentials to access the control panel.</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginUser">Username</label>
+          <input type="text" id="loginUser" placeholder="Enter username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="loginPass">Password</label>
+          <input type="password" id="loginPass" placeholder="Enter password" required autocomplete="current-password">
+        </div>
+        <p class="login-error" id="loginError">Invalid credentials. Please try again.</p>
+        <button type="submit" class="btn-submit">Access Dashboard</button>
+      </form>
+
+      <!-- <p style="margin-top:24px; font-size:0.75rem; color:var(--white-faint);">
+        Default: <span style="color:var(--gold);">admin</span> / <span style="color:var(--gold);">aura2024</span>
+      </p> -->
+      <a href="index.html" style="display:inline-block; margin-top:16px; font-size:0.78rem; color:var(--cream-muted); text-decoration:underline;">
+        &larr; Back to Store
+      </a>
+    </div>
+  </div>
+
+  <!-- ====== DASHBOARD (Hidden until login) ====== -->
+  <div class="dashboard-wrapper" id="dashboardWrapper" style="display:none;">
+
+    <!-- Dashboard Header -->
+    <header class="dash-header">
+      <div class="container">
+        <div class="dash-logo">
+          Aura <span>| Dashboard</span>
+        </div>
+        <div class="dash-user">
+          <span>Welcome, <strong style="color:var(--gold);">Owner</strong></span>
+          <button class="btn-logout" id="btnLogout">Logout</button>
+          <a href="index.html" class="btn-logout" style="border-color:rgba(212,175,55,0.3); color:var(--gold);">View Store</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-top:40px; padding-bottom:60px;">
+
+      <!-- Stats -->
+      <div class="stats-bar" id="statsBar">
+        <div class="stat-card">
+          <div class="stat-num" id="statProducts">0</div>
+          <div class="stat-label">Products</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statOrders">0</div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statPending">0</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statRevenue">$0</div>
+          <div class="stat-label">Revenue</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="dash-tabs" id="dashTabs">
+        <button class="dash-tab active" data-tab="products">Inventory</button>
+        <button class="dash-tab" data-tab="add-product">Add Product</button>
+        <button class="dash-tab" data-tab="orders">Orders</button>
+      </div>
+
+      <!-- TAB: Products / Inventory -->
+      <div class="tab-content active" id="tab-products">
+        <div class="dash-card">
+          <h3>Product Inventory</h3>
+          <div class="dash-product-list" id="dashProductList">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: Add Product -->
+      <div class="tab-content" id="tab-add-product">
+        <div class="dash-card">
+          <h3>Add New Product</h3>
+          <form id="addProductForm" style="max-width:600px;">
+            <div class="form-group">
+              <label for="newName">Product Name</label>
+              <input type="text" id="newName" placeholder="e.g. Royal Amber" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="newPrice">Price</label>
+                <input type="number" id="newPrice" placeholder="450" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="newStatus">Stock Status</label>
+                <select id="newStatus">
+                  <option value="in-stock">In Stock</option>
+                  <option value="out-of-stock">Out of Stock</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="newImage">Product Image</label>
+              <input type="file" id="newImage" accept="image/jpeg,image/png,image/webp,image/avif" required>
+            </div>
+            <div class="form-group">
+              <label for="newDesc">Description</label>
+              <textarea id="newDesc" rows="4" placeholder="Describe the fragrance's character and inspiration..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="newTopNotes">Top Notes</label>
+              <input type="text" id="newTopNotes" placeholder="e.g. Bergamot, Blackcurrant, Apple">
+            </div>
+            <div class="form-group">
+              <label for="newHeartNotes">Heart Notes</label>
+              <input type="text" id="newHeartNotes" placeholder="e.g. Jasmine, Rose, Patchouli">
+            </div>
+            <div class="form-group">
+              <label for="newBaseNotes">Base Notes</label>
+              <input type="text" id="newBaseNotes" placeholder="e.g. Musk, Amber, Sandalwood">
+            </div>
+            <button type="submit" class="btn-submit">Add to Collection</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- TAB: Orders -->
+      <div class="tab-content" id="tab-orders">
+        <div class="dash-card">
+          <h3>Customer Orders</h3>
+          <div class="orders-table-wrap">
+            <table class="orders-table" id="ordersTable">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Email</th>
+                  <th>Phone (Primary)</th>
+                  <th>Phone (Secondary)</th>
+                  <th>Delivery Address</th>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ====== EDIT PRODUCT MODAL ====== -->
+  <div class="edit-modal-backdrop" id="editModal">
+    <div class="modal">
+      <button class="modal-close" id="editModalClose">&times;</button>
+      <h3>Edit Product</h3>
+      <p class="modal-sub">Update product details below.</p>
+      <form id="editProductForm">
+        <input type="hidden" id="editId">
+        <div class="form-group">
+          <label for="editName">Product Name</label>
+          <input type="text" id="editName" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editPrice">Price</label>
+            <input type="number" id="editPrice" min="1" required>
+          </div>
+          <div class="form-group">
+            <label for="editStatus">Stock Status</label>
+            <select id="editStatus">
+              <option value="in-stock">In Stock</option>
+              <option value="out-of-stock">Out of Stock</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editImage">Image URL</label>
+          <input type="url" id="editImage" required>
+        </div>
+        <div class="form-group">
+          <label for="editDesc">Description</label>
+          <textarea id="editDesc" rows="4" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="editTopNotes">Top Notes</label>
+          <input type="text" id="editTopNotes" placeholder="e.g. Bergamot, Blackcurrant, Apple">
+        </div>
+        <div class="form-group">
+          <label for="editHeartNotes">Heart Notes</label>
+          <input type="text" id="editHeartNotes" placeholder="e.g. Jasmine, Rose, Patchouli">
+        </div>
+        <div class="form-group">
+          <label for="editBaseNotes">Base Notes</label>
+          <input type="text" id="editBaseNotes" placeholder="e.g. Musk, Amber, Sandalwood">
+        </div>
+        <button type="submit" class="btn-submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====== DASHBOARD SCRIPT ====== -->
+  <script src="api-config.js"></script>
+  <script src="dashboard.js"></script>
+
+</body>
+</html>

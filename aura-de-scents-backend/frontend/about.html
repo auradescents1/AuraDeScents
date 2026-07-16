@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Philosophy — Aura De Scents</title>
+  <meta name="description" content="Discover the philosophy, craftsmanship, and artistry behind every Aura De Scents fragrance.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ====== NAVIGATION ====== -->
+  <nav class="navbar scrolled" id="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">Aura <span>De Scents</span></a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html" class="active">Philosophy</a></li>
+        <li><a href="collection.html">Collection</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="nav-cart" id="cartToggle" aria-label="Shopping Cart">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 6h15l-1.5 9h-12z" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="9" cy="20" r="1.5"/>
+            <circle cx="17" cy="20" r="1.5"/>
+            <path d="M6 6L5 3H2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="cart-count" id="cartCount">0</span>
+        </div>
+        <div class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ====== CART SIDEBAR ====== -->
+  <div class="cart-backdrop" id="cartBackdrop"></div>
+  <aside class="cart-panel" id="cartPanel">
+    <div class="cart-header">
+      <h3>Your Cart <span id="cartItemCount">(0 items)</span></h3>
+      <button class="cart-close" id="cartClose">&times;</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer" id="cartFooter">
+      <div class="cart-subtotal">
+        <span>Subtotal</span>
+        <strong id="cartSubtotal">$0</strong>
+      </div>
+      <p class="cart-note">Shipping & taxes calculated at checkout. Free worldwide delivery on orders over $500.</p>
+      <button class="btn-checkout" id="btnCheckout" disabled>Proceed to Checkout</button>
+      <button class="btn-continue" id="btnContinue">Continue Shopping</button>
+    </div>
+  </aside>
+
+  <!-- ====== PAGE BANNER ====== -->
+  <header class="page-banner">
+    <div class="container">
+      <p class="page-banner-tag">Our Philosophy</p>
+      <h1>Crafted for the <span class="gold-text">Extraordinary</span></h1>
+      <p>Fragrance as artistry — where centuries of tradition meet the rarest ingredients on earth.</p>
+    </div>
+  </header>
+
+  <!-- ====== PHILOSOPHY CONTENT ====== -->
+  <section class="about-section section-pad reveal" id="about">
+    <div class="container">
+      <p>
+        At Aura De Scents, we believe fragrance is the most intimate form of self-expression.
+        Our master perfumers blend centuries of tradition with modern artistry, sourcing only
+        the finest oud, ambergris, and rare florals to create scents that transcend time.
+        Every bottle tells a story — yours.
+      </p>
+      <p>
+        Each fragrance begins its life not in a laboratory, but on a journey — through the
+        sandalwood forests of Mysore, the rose fields of Bulgaria, and the oud plantations of
+        Cambodia. We work directly with growers and distillers who share our obsession with
+        purity, patience, and provenance.
+      </p>
+
+      <div class="pillars-grid">
+        <div class="pillar-card reveal">
+          <div class="pillar-number">01</div>
+          <h4>Provenance</h4>
+          <p>Every raw material is traced to its source — rare ouds, absolutes, and resins sourced ethically from the world's finest regions.</p>
+        </div>
+        <div class="pillar-card reveal">
+          <div class="pillar-number">02</div>
+          <h4>Craftsmanship</h4>
+          <p>Each fragrance is composed by hand in small batches, aged and refined until it reaches its truest, most balanced expression.</p>
+        </div>
+        <div class="pillar-card reveal">
+          <div class="pillar-number">03</div>
+          <h4>Artistry</h4>
+          <p>We treat every bottle as a composition — a layered pyramid of top, heart, and base notes designed to unfold over time.</p>
+        </div>
+      </div>
+
+      <a href="collection.html" class="section-link-btn">Explore the Collection</a>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer-logo">Aura <span>De Scents</span></div>
+      <p class="footer-text">
+        Redefining luxury fragrance, one masterpiece at a time.
+        Experience the extraordinary.
+      </p>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">Philosophy</a></li>
+        <li><a href="collection.html">Collection</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <p class="footer-copy">&copy; 2024 Aura De Scents. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ====== PRODUCT DETAIL MODAL (unused here, kept for shared script safety) ====== -->
+  <div class="detail-modal-backdrop" id="detailModal">
+    <div class="detail-modal">
+      <button class="detail-modal-close" id="detailModalClose">&times;</button>
+      <div class="detail-modal-img"><img src="" alt=""></div>
+      <div class="detail-modal-body">
+        <span class="detail-badge">Available</span>
+        <h3 class="detail-modal-name">Product Name</h3>
+        <p class="detail-modal-price">$0</p>
+        <p class="detail-modal-desc"></p>
+        <p class="notes-title">Fragrance Notes</p>
+        <div class="notes-pyramid"></div>
+        <div class="detail-modal-actions">
+          <button class="btn-add-cart" data-id="">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== CHECKOUT MODAL ====== -->
+  <div class="modal-backdrop" id="checkoutModal">
+    <div class="modal">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <h3>Complete Your Order</h3>
+      <p class="modal-sub">Enter your details to finalize your purchase.</p>
+
+      <div class="modal-order-summary" id="modalOrderSummary" style="margin-bottom:24px; padding:16px; background:var(--black-elevated); border-radius:4px; border:1px solid rgba(212,175,55,0.1);"></div>
+
+      <form id="checkoutForm">
+        <div class="form-group">
+          <label for="custName">Full Name</label>
+          <input type="text" id="custName" placeholder="Enter your full name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="custEmail">Email Address</label>
+          <input type="email" id="custEmail" placeholder="your@email.com" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="custPhone1">Primary Phone</label>
+            <input type="tel" id="custPhone1" placeholder="+1 (555) 000-0000" required>
+          </div>
+          <div class="form-group">
+            <label for="custPhone2">Secondary Phone</label>
+            <input type="tel" id="custPhone2" placeholder="+1 (555) 000-0000">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="custAddress">Delivery Address</label>
+          <textarea id="custAddress" placeholder="Full delivery address including city, state, and zip code" required></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitOrder">Place Order</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="api-config.js"></script>
+  <script src="site.js"></script>
+</body>
+</html>

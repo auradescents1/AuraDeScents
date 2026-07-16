@@ -1,0 +1,26 @@
+{
+  "name": "aura-de-scents-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Aura De Scents luxury perfumery site",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node src/db/seed.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.13.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "multer": "^2.0.0",
+    "express-rate-limit": "^7.4.0"
+  }
+}
