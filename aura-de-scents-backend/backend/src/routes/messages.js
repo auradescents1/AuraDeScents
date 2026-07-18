@@ -5,22 +5,27 @@ const { requireAdmin } = require('../middleware/auth'); // Adjust path to your a
 
 // 1. POST /api/messages - Public route to submit a contact form message
 router.post('/', async (req, res, next) => {
-  try {
-    const { name, email, message } = req.body;
-    if (!name || !email || !message) {
-      return res.status(400).json({ error: 'All fields are required.' });
-    }
+    try {
+        const { name, email, message } = req.body;
+        if (!name || !email || !message) {
+            return res.status(400).json({ error: 'All fields are required.' });
+        }
 
-    const query = `
-      INSERT INTO contact_messages (name, email, message)
-      VALUES ($1, $2, $3)
-      RETURNING *
-    `;
-    const { rows } = await pool.query(query, [name, email, message]);
-    res.status(201).json({ message: 'Message sent successfully!', data: rows[0] });
-  } catch (err) {
-    next(err);
-  }
+        const query = `
+            INSERT INTO contact_messages (name, email, message)
+            VALUES ($1, $2, $3)
+            RETURNING *
+        `;
+        
+        const { rows } = await pool.query(query, [name, email, message]);
+        res.status(201).json({ message: 'Message sent successfully!', data: rows[0] });
+    } catch (err) {
+        console.error("Database Error on POST /api/messages:", err.message);
+        res.status(500).json({ 
+            error: 'Failed to save message to database.', 
+            details: err.message 
+        });
+    }
 });
 
 // 2. GET /api/messages - Admin only route to fetch all messages
