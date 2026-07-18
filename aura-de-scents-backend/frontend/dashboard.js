@@ -363,7 +363,7 @@
     if (ordersCache.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="10" class="no-data">No orders yet. Orders placed on the store will appear here.</td>
+          <td colspan="11" class="no-data">No orders yet. Orders placed on the store will appear here.</td>
         </tr>`;
       return;
     }
@@ -394,6 +394,10 @@
                   ${capitalize(order.status)}
                 </button>
               </td>
+              <td style="text-align: center;">
+                <button class="delete-order-btn" data-order-id="${order.id}"  title="Delete order unconditionally" style="background: none; border: none; cursor: pointer; color: #ff4d4d; font-size: 1.1rem;   vertical-align: middle;">🗑️
+                </button>
+               </td>
             </tr>
           `;
       })
@@ -414,7 +418,35 @@
       showToast(err.message || 'Could not update order status.', 'error');
     }
   }
+  // Global event listener to handle unconditional order deletions
+  document.getElementById('ordersTableBody').addEventListener('click', async (e) => {
+    const deleteBtn = e.target.closest('.delete-order-btn');
+    if (!deleteBtn) return;
 
+    const orderId = deleteBtn.getAttribute('data-order-id');
+    if (!confirm("Are you sure you want to completely purge this order from database storage?")) return;
+
+    try {
+      const API_BASE = typeof API_URL !== 'undefined' ? API_URL : 'https://auradescents.onrender.com/api';
+      
+      const response = await fetch(`${API_BASE}/orders/${orderId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to delete order.');
+      }
+
+      await refreshAll();
+      showToast('Order successfully purged from database storage.', 'success');
+    } catch (err) {
+      showToast(err.message || 'Could not delete order.', 'error');
+    }
+  });
   // ========== HELPERS ==========
 
   function capitalize(str) {
