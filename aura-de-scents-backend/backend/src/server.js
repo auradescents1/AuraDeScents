@@ -16,16 +16,17 @@ const orderRoutes = require('./routes/orders');
 
 const app = express();
 
-const allowedOrigins = (process.env.CORS_ORIGIN || '')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean);
+// Configure CORS to properly support wildcards or split origins
+const corsOriginEnv = process.env.CORS_ORIGIN || '';
+const corsOptions = {
+  origin: corsOriginEnv === '*' ? '*' : corsOriginEnv.split(',').map(s => s.trim()).filter(Boolean),
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
 
-app.use(
-  cors({
-    origin: allowedOrigins.length ? allowedOrigins : '*',
-  })
-);
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Intercept and handle preflight OPTIONS requests instantly
 app.use(express.json({ limit: '1mb' }));
 // NOTE: product images are no longer served from local disk — Render's
 // filesystem is wiped on every redeploy. Images now live in Supabase
