@@ -427,19 +427,8 @@
     if (!confirm("Are you sure you want to completely purge this order from database storage?")) return;
 
     try {
-      const API_BASE = typeof API_URL !== 'undefined' ? API_URL : 'https://auradescents.onrender.com/api';
-      
-      const response = await fetch(`${API_BASE}/orders/${orderId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || 'Failed to delete order.');
-      }
+      // Using apiFetch ensures your admin authorization headers are sent automatically
+      await apiFetch(`/orders/${orderId}`, { method: 'DELETE' });
 
       await refreshAll();
       showToast('Order successfully purged from database storage.', 'success');
