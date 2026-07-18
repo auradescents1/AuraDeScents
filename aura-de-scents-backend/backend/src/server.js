@@ -18,12 +18,12 @@ const app = express();
 
 // Configure CORS to properly support wildcards or split origins
 const corsOriginEnv = process.env.CORS_ORIGIN || '';
-const corsOptions = {
-  origin: corsOriginEnv === '*' ? '*' : corsOriginEnv.split(',').map(s => s.trim()).filter(Boolean),
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-};
+21: const corsOptions = {
+22:   origin: corsOriginEnv === '*' ? '*' : corsOriginEnv.split(',').map(s => s.trim()).filter(Boolean),
+23:   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // <-- Added 'PATCH' here
+24:   allowedHeaders: ['Content-Type', 'Authorization'],
+25:   credentials: false // <-- Changed to false here
+26: };
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions)); // Intercept and handle preflight OPTIONS requests instantly
