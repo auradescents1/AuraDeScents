@@ -436,6 +436,86 @@
       showToast(err.message || 'Could not delete order.', 'error');
     }
   });
+
+  // ============ MESSAGES ============
+
+async function fetchAndRenderMessages() {
+  const tbody = document.getElementById('messagesTableBody');
+  if (!tbody) return;
+
+  try {
+    tbody.innerHTML = '<tr><td colspan="5" class="no-data">Loading inquiries...</td></tr>';
+    
+    // Using your dashboard's authorized fetch wrapper
+    const messages = await apiFetch('/messages'); 
+    
+    if (!messages || messages.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="no-data">No messages yet. Contact inquiries will appear here.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = messages.map(msg => {
+      const msgDate = new Date(msg.created_at).toLocaleDateString();
+      return `
+        <tr data-id="${msg.id}">
+          <td>${msgDate}</td>
+          <td><strong>${escapeHTML(msg.name)}</strong></td>
+          <td><a href="mailto:${msg.email}" style="color: var(--white-faint);">${escapeHTML(msg.email)}</a></td>
+          <td style="max-width: 300px; white-space: normal; word-break: break-word;">${escapeHTML(msg.message)}</td>
+          <td>
+            <button class="btn-delete-msg action-btn" data-id="${msg.id}" title="Permanently Delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Attach click listeners to the fresh trash icons for storage cleanup
+    tbody.querySelectorAll('.btn-delete-msg').forEach(btn => {
+      btn.addEventListener('click', handleDeleteMessage);
+    });
+
+  } catch (err) {
+    console.error('Error fetching messages:', err);
+    tbody.innerHTML = '<tr><td colspan="5" class="no-data" style="color: #ff4d4d;">Failed to load messages.</td></tr>';
+  }
+}
+
+// Unconditional deletion handler to free up database storage rows
+async function handleDeleteMessage(e) {
+  const btn = e.currentTarget;
+  const messageId = btn.getAttribute('data-id');
+  
+  if (!confirm('Are you absolutely sure you want to permanently delete this message to free up database space? This cannot be undone.')) {
+    return;
+  }
+
+  try {
+    btn.disabled = true;
+    
+    // Hit our DELETE backend route with admin privileges
+    await apiFetch(`/messages/${messageId}`, { method: 'DELETE' });
+    
+    // Smoothly strip the row directly out of the UI matching your order cleanups
+    const row = document.querySelector(`tr[data-id="${messageId}"]`);
+    if (row) row.remove();
+    
+    showToast('Message permanently purged.', 'success');
+  } catch (err) {
+    console.error('Failed to delete message:', err);
+    showToast(err.message || 'Failed to purge message.', 'error');
+    btn.disabled = false;
+  }
+}
+
+// Simple helper to prevent layout breaks from user-submitted text
+function escapeHTML(str) {
+  if (!str) return '';
+  return str.replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  );
+}
   // ========== HELPERS ==========
 
   function capitalize(str) {
@@ -455,13 +535,17 @@
     if (tab) tab.classList.add('active');
     const content = document.getElementById('tab-' + tabName);
     if (content) content.classList.add('active');
+    if (tabName === 'messages') {
+        fetchAndRenderMessages();
+    }
   }
 
   async function refreshAll() {
     try {
-      const [products, orders] = await Promise.all([apiFetch('/products'), apiFetch('/orders')]);
+      const [products, orders, messages] = await Promise.all([apiFetch('/products'), apiFetch('/orders'), apiFetch('/messages')]);
       productsCache = products;
       ordersCache = orders;
+      messagesCache = messages;
       updateStats();
       renderProducts();
       renderOrders();
@@ -469,6 +553,94 @@
       showToast(err.message || 'Could not load dashboard data.', 'error');
     }
   }
+
+  // ============ MESSAGES ============
+
+async function fetchAndRenderMessages() {
+  const tbody = document.getElementById('messagesTableBody');
+  if (!tbody) return;
+
+  try {
+    // If the cache doesn't exist yet, do a quick fallback fetch
+    let messages = typeof messagesCache !== 'undefined' ? messagesCache : [];
+    if (!messages || messages.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="no-data">Loading inquiries...</td></tr>';
+      messages = await apiFetch('/messages');
+      if (typeof messagesCache !== 'undefined') messagesCache = messages;
+    }
+    
+    if (!messages || messages.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="no-data">No messages yet. Contact inquiries will appear here.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = messages.map(msg => {
+      const msgDate = new Date(msg.created_at).toLocaleDateString();
+      return `
+        <tr data-id="${msg.id}">
+          <td>${msgDate}</td>
+          <td><strong>${escapeHTML(msg.name)}</strong></td>
+          <td><a href="mailto:${msg.email}" style="color: var(--white-faint);">${escapeHTML(msg.email)}</a></td>
+          <td style="max-width: 300px; white-space: normal; word-break: break-word;">${escapeHTML(msg.message)}</td>
+          <td>
+            <button class="btn-delete-msg action-btn" data-id="${msg.id}" title="Permanently Delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Attach click listeners to the fresh trash icons
+    tbody.querySelectorAll('.btn-delete-msg').forEach(btn => {
+      btn.addEventListener('click', handleDeleteMessage);
+    });
+
+  } catch (err) {
+    console.error('Error rendering messages:', err);
+    tbody.innerHTML = '<tr><td colspan="5" class="no-data" style="color: #ff4d4d;">Failed to load messages.</td></tr>';
+  }
+}
+
+// Unconditional deletion handler to free up database storage rows
+async function handleDeleteMessage(e) {
+  const btn = e.currentTarget;
+  const messageId = btn.getAttribute('data-id');
+  
+  if (!confirm('Are you absolutely sure you want to permanently delete this message to free up database space? This cannot be undone.')) {
+    return;
+  }
+
+  try {
+    btn.disabled = true;
+    
+    // Hit our DELETE backend route
+    await apiFetch(`/messages/${messageId}`, { method: 'DELETE' });
+    
+    // Update local cache so it stays synced when switching tabs back and forth
+    if (typeof messagesCache !== 'undefined') {
+      messagesCache = messagesCache.filter(msg => msg.id != messageId);
+    }
+    
+    // Smoothly strip the row directly out of the UI
+    const row = document.querySelector(`tr[data-id="${messageId}"]`);
+    if (row) row.remove();
+    
+    showToast('Message permanently purged.', 'success');
+  } catch (err) {
+    console.error('Failed to delete message:', err);
+    showToast(err.message || 'Failed to purge message.', 'error');
+    btn.disabled = false;
+  }
+}
+
+// Simple helper to prevent layout breaks from user-submitted text
+function escapeHTML(str) {
+  if (!str) return '';
+  return str.replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  );
+}
 
   // ========== TOAST NOTIFICATIONS ==========
 

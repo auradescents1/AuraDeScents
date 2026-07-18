@@ -13,6 +13,8 @@ const { ensureSchema } = require('./db');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
+const messageRouter = require('./routes/messages');
+
 
 const app = express();
 
@@ -37,6 +39,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().t
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/messages', messageRouter);
 
 // 404 handler
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found.' }));

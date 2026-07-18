@@ -611,16 +611,51 @@
 
   // ========== CONTACT FORM (contact.html — client-side only) ==========
 
-  function initContactForm() {
-    const form = document.getElementById('contactForm');
-    if (!form) return;
+ function initContactForm() {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      showToast("Message sent. We'll be in touch shortly.", 'success');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Dynamically grab inputs inside the form
+    const nameEl = form.querySelector('input[type="text"]') || document.getElementById('contactName');
+    const emailEl = form.querySelector('input[type="email"]') || document.getElementById('contactEmail');
+    const messageEl = form.querySelector('textarea') || document.getElementById('contactMessage');
+
+    const name = nameEl ? nameEl.value.trim() : '';
+    const email = emailEl ? emailEl.value.trim() : '';
+    const message = messageEl ? messageEl.value.trim() : '';
+
+    if (!name || !email || !message) {
+      showToast('Please fill out all fields.', 'error');
+      return;
+    }
+
+    try {
+      // Use your configured API URL base, defaulting to the live Render backend
+      const API_BASE = typeof API_URL !== 'undefined' ? API_URL : 'https://aura-de-scents-backend.onrender.com/api';
+      
+      const response = await fetch(`${API_BASE}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send your message.');
+      }
+
+      showToast('Message sent! We will be in touch shortly.', 'success');
       form.reset();
-    });
-  }
+    } catch (err) {
+      console.error('Contact Form Error:', err);
+      showToast(err.message || 'Something went wrong. Please try again.', 'error');
+    }
+  });
+ }
 
   // ========== INITIALIZE ==========
 
