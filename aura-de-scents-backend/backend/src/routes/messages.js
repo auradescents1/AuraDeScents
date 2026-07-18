@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // Adjust path to your db config if needed
+const { pool } = require('../db'); // Adjust path to your db config if needed
 const { requireAdmin } = require('../middleware/auth'); // Adjust path to your auth middleware
 
 // 1. POST /api/messages - Public route to submit a contact form message
