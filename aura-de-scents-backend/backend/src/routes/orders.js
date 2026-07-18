@@ -143,4 +143,30 @@ router.patch('/:id/status', requireAdmin, async (req, res, next) => {
   }
 });
 
+// DELETE /api/orders/:id - Delete an order if it is delivered (admin only)
+router.delete('/:id', requireAdmin, async (req, res, next) => {
+  try {
+    // 1. Check if the order exists and get its current status
+    const { rows } = await pool.query('SELECT status FROM orders WHERE id = $1', [req.params.id]);
+    const order = rows[0];
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found.' });
+    }
+
+    // 2. Enforce deletion only for delivered orders
+    if (order.status !== 'delivered') {
+      return res.status(400).json({ error: 'Only delivered orders can be deleted to save space.' });
+    }
+
+    // 3. Delete related items first due to foreign key constraints, then the order
+    await pool.query('DELETE FROM order_items WHERE order_id = $1', [req.params.id]);
+    await pool.query('DELETE FROM orders WHERE id = $1', [req.params.id]);
+
+    res.json({ message: 'Delivered order successfully purged from the database.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
