@@ -142,7 +142,7 @@
     document.getElementById('statProducts').textContent = productsCache.length;
     document.getElementById('statOrders').textContent = ordersCache.length;
     document.getElementById('statPending').textContent = pending;
-    document.getElementById('statRevenue').textContent = '$' + revenue.toLocaleString();
+    document.getElementById('statRevenue').textContent =revenue.toLocaleString();
   }
 
   // ========== TABS ==========
