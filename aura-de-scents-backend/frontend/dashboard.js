@@ -26,6 +26,7 @@
 
   let productsCache = [];
   let ordersCache = [];
+  let messagesCache = []; 
 
   // ========== AUTH ==========
 
