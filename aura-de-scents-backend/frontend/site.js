@@ -447,7 +447,7 @@
         .join('')}
       <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0 0; margin-top:8px;">
         <span style="color:var(--cream); font-weight:600;">Total</span>
-        <span style="color:var(--gold); font-family:var(--font-display); font-size:1.2rem; font-weight:700;">$${getCartTotal().toLocaleString()}</span>
+        <span style="color:var(--gold); font-family:var(--font-display); font-size:1.2rem; font-weight:700;">${getCartTotal().toLocaleString()}</span>
       </div>
     `;
     modalOrderSummary.innerHTML = summaryHTML;
