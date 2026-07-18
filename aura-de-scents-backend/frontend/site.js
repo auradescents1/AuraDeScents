@@ -149,7 +149,7 @@
       cartItemCountEl.textContent = `(${count} item${count !== 1 ? 's' : ''})`;
     }
     if (cartSubtotalEl) {
-      cartSubtotalEl.textContent = `$${getCartTotal().toLocaleString()}`;
+      cartSubtotalEl.textContent = `${getCartTotal().toLocaleString()}`;
     }
     if (btnCheckout) {
       btnCheckout.disabled = count === 0;
@@ -440,7 +440,7 @@
           (item) => `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--cream);">${item.name} <span style="color:var(--white-faint);">×${item.quantity}</span></span>
-          <span style="color:var(--gold); font-weight:600;">$${(item.price * item.quantity).toLocaleString()}</span>
+          <span style="color:var(--gold); font-weight:600;">${(item.price * item.quantity).toLocaleString()}</span>
         </div>
       `
         )
