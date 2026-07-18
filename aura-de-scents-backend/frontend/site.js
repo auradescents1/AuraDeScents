@@ -634,7 +634,7 @@
 
     try {
       // Use your configured API URL base, defaulting to the live Render backend
-      const API_BASE = typeof API_URL !== 'undefined' ? API_URL : 'https://aura-de-scents-backend.onrender.com/api';
+      const API_BASE = typeof API_URL !== 'undefined' ? API_URL : 'https://auradescents.onrender.com/api';
       
       const response = await fetch(`${API_BASE}/messages`, {
         method: 'POST',
