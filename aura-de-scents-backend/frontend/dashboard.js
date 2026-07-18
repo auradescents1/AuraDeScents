@@ -142,7 +142,7 @@
     document.getElementById('statProducts').textContent = productsCache.length;
     document.getElementById('statOrders').textContent = ordersCache.length;
     document.getElementById('statPending').textContent = pending;
-    document.getElementById('statRevenue').textContent =revenue.toLocaleString();
+    document.getElementById('statRevenue').textContent = revenue.toLocaleString();
   }
 
   // ========== TABS ==========
@@ -387,7 +387,7 @@
               <td>${order.phone2 || '—'}</td>
               <td style="max-width:180px; white-space:normal; line-height:1.4;">${order.address}</td>
               <td style="color:var(--gold); font-weight:500; max-width:200px;">${productDisplay}</td>
-              <td style="font-weight:600;">$${parseFloat(order.productPrice).toLocaleString()}</td>
+              <td style="font-weight:600;">${parseFloat(order.productPrice).toLocaleString()}</td>
               <td style="font-size:0.82rem; white-space:nowrap;">${formatDate(order.createdAt)}</td>
               <td>
                 <button class="status-badge ${order.status}" data-order-id="${order.id}" title="Click to cycle status">
