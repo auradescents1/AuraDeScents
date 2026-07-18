@@ -550,6 +550,7 @@ function escapeHTML(str) {
       updateStats();
       renderProducts();
       renderOrders();
+      fetchAndRenderMessages();
     } catch (err) {
       showToast(err.message || 'Could not load dashboard data.', 'error');
     }
