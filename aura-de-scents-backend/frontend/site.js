@@ -723,7 +723,7 @@
 
 
 /** Global Image Auto-Swapping Loop */
-function initAutoImageSwapper(intervalTime = 2000) {
+function initAutoImageSwapper(intervalTime = 3000) {
     if (window.carouselIntervalActive) return;
     window.carouselIntervalActive = true;
 
@@ -762,5 +762,5 @@ function initAutoImageSwapper(intervalTime = 2000) {
         });
     }, intervalTime);
 }
-initAutoImageSwapper(2000);
+initAutoImageSwapper(3000);
 
