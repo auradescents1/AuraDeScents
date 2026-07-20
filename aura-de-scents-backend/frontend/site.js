@@ -762,4 +762,5 @@ function initAutoImageSwapper(intervalTime = 4000) {
         });
     }, intervalTime);
 }
+initAutoImageSwapper(4000);
 

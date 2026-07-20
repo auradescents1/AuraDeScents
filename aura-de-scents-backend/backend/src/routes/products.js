@@ -29,6 +29,7 @@ function rowToProduct(row) {
     price: Number(row.price),
     description: row.description,
     image: row.image,
+    is_featured: row.is_featured,
     status: row.status,
     topNotes: row.top_notes,
     heartNotes: row.heart_notes,
@@ -114,14 +115,15 @@ router.post('/', requireAdmin, async (req, res, next) => {
       description,
       image,
       status = 'in-stock',
+      is_featured,
       topNotes = '',
       heartNotes = '',
       baseNotes = '',
     } = req.body;
 
     await pool.query(
-      `INSERT INTO products (id, name, price, description, image, status, top_notes, heart_notes, base_notes, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      `INSERT INTO products (id, name, price, description, image, status, top_notes, heart_notes, base_notes, is_featured, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         id,
         name.trim(),
@@ -129,6 +131,7 @@ router.post('/', requireAdmin, async (req, res, next) => {
         description.trim(),
         image,
         status,
+        !!is_featured,
         topNotes.trim(),
         heartNotes.trim(),
         baseNotes.trim(),
@@ -159,26 +162,28 @@ router.put('/:id', requireAdmin, async (req, res, next) => {
       description: (req.body.description ?? existing.description).trim(),
       image: (req.body.image ?? existing.image),
       status: req.body.status ?? existing.status,
+      is_featured: req.body.is_featured !== undefined ? !!req.body.is_featured : !!existing.is_featured,
       topNotes: (req.body.topNotes ?? existing.top_notes ?? '').trim(),
       heartNotes: (req.body.heartNotes ?? existing.heart_notes ?? '').trim(),
       baseNotes: (req.body.baseNotes ?? existing.base_notes ?? '').trim(),
     };
 
     await pool.query(
-      `UPDATE products
-       SET name = $1, price = $2, description = $3, image = $4, status = $5, top_notes = $6, heart_notes = $7, base_notes = $8
-       WHERE id = $9`,
-      [
+    `UPDATE products 
+     SET name = $1, price = $2, description = $3, image = $4, status = $5, is_featured = $6, top_notes = $7, heart_notes = $8, base_notes = $9
+     WHERE id = $10`,
+    [
         merged.name,
         merged.price,
         merged.description,
         merged.image,
         merged.status,
+        merged.is_featured, // <-- Column update item array mapping index $6
         merged.topNotes,
         merged.heartNotes,
         merged.baseNotes,
-        req.params.id,
-      ]
+        req.params.id // Index $10
+    ]
     );
 
     const { rows } = await pool.query('SELECT * FROM products WHERE id = $1', [req.params.id]);
