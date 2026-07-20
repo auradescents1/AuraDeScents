@@ -23,12 +23,12 @@
   const editModal = document.getElementById('editModal');
   const editModalClose = document.getElementById('editModalClose');
   const editProductForm = document.getElementById('editProductForm');
-  // 1. Get the featured checkbox status
-  const isFeaturedCheckbox = document.getElementById('product-featured'); // Ensure this ID matches your HTML checkbox
-  const isFeatured = isFeaturedCheckbox ? isFeaturedCheckbox.checked : false;
-  // 2. Safely capture multiple file uploads as an array
-  const fileInput = addProductForm.querySelector('input[type="file"]');
-  const selectedFiles = fileInput ? Array.from(fileInput.files) : [];
+  // // 1. Get the featured checkbox status
+  // const isFeaturedCheckbox = document.getElementById('product-featured'); // Ensure this ID matches your HTML checkbox
+  // const isFeatured = isFeaturedCheckbox ? isFeaturedCheckbox.checked : false;
+  // // 2. Safely capture multiple file uploads as an array
+  // const fileInput = addProductForm.querySelector('input[type="file"]');
+  // const selectedFiles = fileInput ? Array.from(fileInput.files) : [];
 
   let productsCache = [];
   let ordersCache = [];
@@ -239,15 +239,16 @@
   addProductForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const submitBtn = addProductForm.querySelector('button[type="submit"]');
+    const isFeatured = document.getElementById('add-product-featured')?.checked || false;
     if (submitBtn) submitBtn.disabled = true;
 
     try {
         const imageInput = document.getElementById('newImage');
         const selectedFiles = imageInput ? Array.from(imageInput.files) : [];
         
-        // 1. Check if the product should be featured (make sure this matches your HTML checkbox ID!)
-        const featuredCheckbox = document.getElementById('add-product-featured');
-        const isFeatured = featuredCheckbox ? featuredCheckbox.checked : false;
+        // // 1. Check if the product should be featured (make sure this matches your HTML checkbox ID!)
+        // const featuredCheckbox = document.getElementById('add-product-featured');
+        // const isFeatured = featuredCheckbox ? featuredCheckbox.checked : false;
 
         let imageUrls = [];
 
@@ -332,7 +333,7 @@
     document.getElementById('editTopNotes').value = product.topNotes || '';
     document.getElementById('editHeartNotes').value = product.heartNotes || '';
     document.getElementById('editBaseNotes').value = product.baseNotes || '';
-    document.getElementById('product-featured').checked = !!product.is_featured;
+    document.getElementById('edit-product-featured').checked = !!product.is_featured;
 
     editModal.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -357,15 +358,16 @@
     e.preventDefault();
     const id = document.getElementById('editId').value;
     const submitBtn = editProductForm.querySelector('button[type="submit"]');
+    const isFeatured = document.getElementById('edit-product-featured')?.checked || false;
     if (submitBtn) submitBtn.disabled = true;
 
    try {
         const imageInput = document.getElementById('editImage');
         const selectedFiles = imageInput ? Array.from(imageInput.files) : [];
         
-        // 1. Grab the edit form's featured checkbox status
-        const featuredCheckbox = document.getElementById('editFeatured');
-        const isFeatured = featuredCheckbox ? featuredCheckbox.checked : false;
+        // // 1. Grab the edit form's featured checkbox status
+        // const featuredCheckbox = document.getElementById('edit-product-featured');
+        // const isFeatured = featuredCheckbox ? featuredCheckbox.checked : false;
 
         let imageUrls;
 

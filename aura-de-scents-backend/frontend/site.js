@@ -731,21 +731,32 @@ function initAutoImageSwapper(intervalTime = 4000) {
         const structuralImages = document.querySelectorAll('.product-carousel-img');
         
         structuralImages.forEach(img => {
-            // Safe parsing of the images array from the element data attribute
             let images;
             try {
-                images = JSON.parse(img.getAttribute('data-images'));
-            } catch(e) { return; }
-            
-            if (!images || images.length <= 1) return; 
-            
-            let currentIndex = parseInt(img.getAttribute('data-current-index') || '0');
-            currentIndex = (currentIndex + 1) % images.length; 
-            
+                const rawData = img.getAttribute('data-images');
+                if (rawData.trim().startsWith('[')) {
+                    images = JSON.parse(rawData);
+                } else if (rawData.trim().startsWith('{')) {
+                    images = rawData.replace(/[{}]/g, '').split(',');
+                } else {
+                    images = [rawData];
+                }
+            } catch (e) {
+                images = [];
+            }
+
+            if (!images || images.length <= 1) return;
+
+            let currentIndex = parseInt(img.getAttribute('data-current-index') || '0', 10);
+            // Move cleanly to the NEXT index position
+            let nextIndex = (currentIndex + 1) % images.length;
+
+            // Smooth opacity transition
             img.style.opacity = 0.4;
+            
             setTimeout(() => {
-                img.src = images[currentIndex];
-                img.setAttribute('data-current-index', currentIndex);
+                img.src = images[nextIndex];
+                img.setAttribute('data-current-index', nextIndex);
                 img.style.opacity = 1;
             }, 200);
         });
