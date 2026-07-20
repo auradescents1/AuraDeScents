@@ -332,8 +332,8 @@
     document.getElementById('editTopNotes').value = product.topNotes || '';
     document.getElementById('editHeartNotes').value = product.heartNotes || '';
     document.getElementById('editBaseNotes').value = product.baseNotes || '';
-    document.getElementById('editFeatured').checked = !!product.is_featured;
-    
+    document.getElementById('product-featured').checked = !!product.is_featured;
+
     editModal.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
