@@ -363,13 +363,12 @@
 
    try {
         const imageInput = document.getElementById('editImage');
-        const selectedFiles = imageInput ? Array.from(imageInput.files) : [];
+        const imageUrls = imageInput ? [imageInput.value.trim()] : [FALLBACK_IMAGE];
         
         // // 1. Grab the edit form's featured checkbox status
         // const featuredCheckbox = document.getElementById('edit-product-featured');
         // const isFeatured = featuredCheckbox ? featuredCheckbox.checked : false;
 
-        let imageUrls;
 
         if (selectedFiles.length > 0) {
             // 2. Admin uploaded new images -> process them all

@@ -122,7 +122,7 @@ router.post('/', requireAdmin, async (req, res, next) => {
     } = req.body;
 
     await pool.query(
-      `INSERT INTO products (id, name, price, description, image, status, top_notes, heart_notes, base_notes, is_featured, created_at)
+      `INSERT INTO products (id, name, price, description, image, status,is_featured, top_notes, heart_notes, base_notes, created_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         id,
