@@ -276,7 +276,7 @@
             
             <div class="product-details" style="padding: 15px;">
                 <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
-                <p class="product-price">$${product.price || '0.00'}</p>
+                <p class="product-price">${product.price || '0.00'}</p>
             </div>
         </article>
     `;
@@ -723,7 +723,7 @@
 
 
 /** Global Image Auto-Swapping Loop */
-function initAutoImageSwapper(intervalTime = 4000) {
+function initAutoImageSwapper(intervalTime = 2000) {
     if (window.carouselIntervalActive) return;
     window.carouselIntervalActive = true;
 
@@ -762,5 +762,5 @@ function initAutoImageSwapper(intervalTime = 4000) {
         });
     }, intervalTime);
 }
-initAutoImageSwapper(4000);
+initAutoImageSwapper(2000);
 
