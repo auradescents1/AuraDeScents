@@ -274,7 +274,11 @@
                 ` : ''}
             </div>
             
-            <!-- Rest of your product card details below (name, price, etc.) -->
+            <div class="product-details" style="padding: 15px;">
+                <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
+                <p class="product-price">$${product.price || '0.00'}</p>
+            </div>
+        </article>
     `;
 }
 

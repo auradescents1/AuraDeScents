@@ -246,7 +246,7 @@
         const selectedFiles = imageInput ? Array.from(imageInput.files) : [];
         
         // 1. Check if the product should be featured (make sure this matches your HTML checkbox ID!)
-        const featuredCheckbox = document.getElementById('product-featured');
+        const featuredCheckbox = document.getElementById('add-product-featured');
         const isFeatured = featuredCheckbox ? featuredCheckbox.checked : false;
 
         let imageUrls = [];
