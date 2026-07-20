@@ -260,28 +260,23 @@
                 : '<span class="product-badge in-stock">Available</span>'
             }
             <div class="product-card-img" style="position: relative; overflow: hidden;">
-                <!-- Added data attributes for our automated image carousels -->
+                <!-- Main Image displaying the current view -->
                 <img src="${firstImage}" 
-                     class="product-carousel-img"
-                     data-current-index="0"
-                     data-images='${JSON.stringify(imageArray)}'
-                     alt="${product.name}" 
-                     loading="lazy"
-                     style="transition: opacity 0.4s ease-in-out;"
-                     onerror="this.src='${FALLBACK_IMAGE}'">
-                <div class="product-card-overlay"></div>
+                     class="product-carousel-img" 
+                     data-current-index="0" 
+                     data-images='${JSON.stringify(imageArray)}' 
+                     style="width: 100%; display: block;" />
+                
+                <!-- Navigation Buttons (Only render if there's more than 1 image) -->
+                ${imageArray.length > 1 ? `
+                    <button class="carousel-btn prev-btn" onclick="moveCarousel(this, -1, event)" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; z-index: 2;">&#10094;</button>
+                    <button class="carousel-btn next-btn" onclick="moveCarousel(this, 1, event)" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; z-index: 2;">&#10095;</button>
+                ` : ''}
             </div>
-            <div class="product-card-body">
-                <h3 class="product-card-name">${product.name}</h3>
-                <p class="product-card-desc">${product.description}</p>
-                <div class="product-card-footer">
-                    <span class="product-card-price">$${product.price.toLocaleString()}</span>
-                    <button class="btn-add-cart" data-id="${product.id}">Add To Cart</button>
-                </div>
-            </div>
-        </article>
+            
+            <!-- Rest of your product card details below (name, price, etc.) -->
     `;
-  }
+}
 
   /** Render the full product grid (collection.html) */
   function renderProducts() {
@@ -305,39 +300,45 @@
 
   /** Render a limited "featured" preview grid (index.html) */
   async function renderFeaturedProducts() {
-      const grid = document.getElementById('featuredGrid');
-      if (!grid) return;
+    const grid = document.getElementById('featuredGrid');
+    if (!grid) return;
 
-      try {
-          // 1. Fetch only items where is_featured is true from Supabase
-          const { data: products, error } = await supabase
-              .from('products')
-              .select('*')
-              .eq('is_featured', true)
-              .limit(4); // Clean layout of up to 4 items
+    try {
+        // 1. Fetch products from your Node/Express backend on Render
+        // Note: window.AURA_API_BASE already includes '/api', so we just append '/products'
+        const response = await fetch(`${window.AURA_API_BASE}/products`);
+        
+        if (!response.ok) {
+            throw new Error(`Server responded with status: ${response.status}`);
+        }
+        
+        let products = await response.json();
 
-          if (error) throw error;
+        // 2. Client-side filter to only show featured items in this specific section
+        if (Array.isArray(products)) {
+            products = products.filter(p => p.is_featured === true || p.is_featured === 'true').slice(0, 4);
+        }
 
-          // 2. Handle empty database fallback state
-          if (!products || products.length === 0) {
-              grid.innerHTML = `
-                  <div class="no-data" style="grid-column: 1 / -1;">
-                      <p>No featured fragrances available at the moment. Check back soon.</p>
-                  </div>`;
-              return;
-          }
+        // 3. Handle empty fallback state
+        if (!products || products.length === 0) {
+            grid.innerHTML = `
+                <div class="no-data" style="grid-column: 1 / -1;">
+                    <p>No featured fragrances available at the moment. Check back soon.</p>
+                </div>`;
+            return;
+        }
 
-          // 3. Map through data using your existing card builder
-          grid.innerHTML = products.map(buildProductCard).join('');
-          
-          // 4. Fire existing actions and initialize image slider animation
-          attachProductCardEvents(grid);
-          observeRevealElements();
-          initAutoImageSwapper(4000);
+        // 4. Map through data using your updated multi-image card builder
+        grid.innerHTML = products.map(buildProductCard).join('');
 
-      } catch (err) {
-          console.error("Error rendering featured collection:", err.message);
-      }
+        // 5. Fire actions and kick off your automated crossfade carousel
+        attachProductCardEvents(grid);
+        observeRevealElements();
+        initAutoImageSwapper(4000);
+
+    } catch (err) {
+        console.error("Error rendering featured collection:", err.message);
+    }
   }
 
   /** Attach add-to-cart and card-click (detail modal) events within a grid */
@@ -747,32 +748,3 @@ function initAutoImageSwapper(intervalTime = 4000) {
     }, intervalTime);
 }
 
-/** Global Image Auto-Swapping Loop */
-function initAutoImageSwapper(intervalTime = 4000) {
-    if (window.carouselIntervalActive) return;
-    window.carouselIntervalActive = true;
-
-    setInterval(() => {
-        const structuralImages = document.querySelectorAll('.product-carousel-img');
-        
-        structuralImages.forEach(img => {
-            let images;
-            try {
-                images = JSON.parse(img.getAttribute('data-images'));
-            } catch(e) { return; }
-            
-            if (!images || images.length <= 1) return; // Skip single image cards safely
-            
-            let currentIndex = parseInt(img.getAttribute('data-current-index') || '0');
-            currentIndex = (currentIndex + 1) % images.length; 
-            
-            // Apply smooth crossfade transition
-            img.style.opacity = 0.4;
-            setTimeout(() => {
-                img.src = images[currentIndex];
-                img.setAttribute('data-current-index', currentIndex);
-                img.style.opacity = 1;
-            }, 200);
-        });
-    }, intervalTime);
-}
