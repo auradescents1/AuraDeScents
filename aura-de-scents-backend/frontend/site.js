@@ -85,7 +85,8 @@
         id: product.id,
         name: product.name,
         price: product.price,
-        image: product.image,
+        // Safe array check: use the first item if it's an array, otherwise use the string directly
+        image: Array.isArray(product.image) ? product.image[0] : product.image,
         quantity: 1,
       });
     }
@@ -180,7 +181,10 @@
         (item) => `
       <div class="cart-item" data-id="${item.id}">
         <div class="cart-item-img">
-          <img src="${item.image}" alt="${item.name}" loading="lazy">
+          <img src="${item.image || FALLBACK_IMAGE}" 
+     alt="${item.name}" 
+     loading="lazy" 
+     onerror="this.src='${FALLBACK_IMAGE}'">
         </div>
         <div class="cart-item-details">
           <div>
@@ -244,31 +248,38 @@
   // ========== PRODUCT RENDERING ==========
 
   function buildProductCard(product) {
+    // Ensure we handle arrays safely, fallback to a single string or placeholder if empty
+    const imageArray = Array.isArray(product.image) ? product.image : [product.image];
+    const firstImage = imageArray[0] || FALLBACK_IMAGE;
+
     return `
-      <article class="product-card reveal" data-id="${product.id}">
-        ${
-          product.status === 'out-of-stock'
-            ? '<span class="product-badge">Sold Out</span>'
-            : '<span class="product-badge in-stock">Available</span>'
-        }
-        <div class="product-card-img">
-          <img src="${product.image}" alt="${product.name}" loading="lazy"
-               onerror="this.src='${FALLBACK_IMAGE}'">
-          <div class="product-card-overlay"></div>
-        </div>
-        <div class="product-card-body">
-          <h3 class="product-card-name">${product.name}</h3>
-          <p class="product-card-desc">${product.description}</p>
-          <div class="product-card-footer">
-            <span class="product-card-price">${product.price.toLocaleString()}</span>
-            <button class="btn-add-cart"
-                    data-id="${product.id}"
-                    ${product.status === 'out-of-stock' ? 'disabled' : ''}>
-              ${product.status === 'out-of-stock' ? 'Sold Out' : 'Add to Cart'}
-            </button>
-          </div>
-        </div>
-      </article>
+        <article class="product-card reveal" data-id="${product.id}">
+            ${
+                product.status === 'out-of-stock'
+                ? '<span class="product-badge out">Sold Out</span>'
+                : '<span class="product-badge in-stock">Available</span>'
+            }
+            <div class="product-card-img" style="position: relative; overflow: hidden;">
+                <!-- Added data attributes for our automated image carousels -->
+                <img src="${firstImage}" 
+                     class="product-carousel-img"
+                     data-current-index="0"
+                     data-images='${JSON.stringify(imageArray)}'
+                     alt="${product.name}" 
+                     loading="lazy"
+                     style="transition: opacity 0.4s ease-in-out;"
+                     onerror="this.src='${FALLBACK_IMAGE}'">
+                <div class="product-card-overlay"></div>
+            </div>
+            <div class="product-card-body">
+                <h3 class="product-card-name">${product.name}</h3>
+                <p class="product-card-desc">${product.description}</p>
+                <div class="product-card-footer">
+                    <span class="product-card-price">$${product.price.toLocaleString()}</span>
+                    <button class="btn-add-cart" data-id="${product.id}">Add To Cart</button>
+                </div>
+            </div>
+        </article>
     `;
   }
 
@@ -293,23 +304,40 @@
   }
 
   /** Render a limited "featured" preview grid (index.html) */
-  function renderFeaturedProducts() {
-    const grid = document.getElementById('featuredGrid');
-    if (!grid) return;
+  async function renderFeaturedProducts() {
+      const grid = document.getElementById('featuredGrid');
+      if (!grid) return;
 
-    const products = getProducts().slice(0, 3);
+      try {
+          // 1. Fetch only items where is_featured is true from Supabase
+          const { data: products, error } = await supabase
+              .from('products')
+              .select('*')
+              .eq('is_featured', true)
+              .limit(4); // Clean layout of up to 4 items
 
-    if (products.length === 0) {
-      grid.innerHTML = `
-        <div class="no-data" style="grid-column: 1 / -1;">
-          <p>No fragrances available at the moment. Check back soon.</p>
-        </div>`;
-      return;
-    }
+          if (error) throw error;
 
-    grid.innerHTML = products.map(buildProductCard).join('');
-    attachProductCardEvents(grid);
-    observeRevealElements();
+          // 2. Handle empty database fallback state
+          if (!products || products.length === 0) {
+              grid.innerHTML = `
+                  <div class="no-data" style="grid-column: 1 / -1;">
+                      <p>No featured fragrances available at the moment. Check back soon.</p>
+                  </div>`;
+              return;
+          }
+
+          // 3. Map through data using your existing card builder
+          grid.innerHTML = products.map(buildProductCard).join('');
+          
+          // 4. Fire existing actions and initialize image slider animation
+          attachProductCardEvents(grid);
+          observeRevealElements();
+          initAutoImageSwapper(4000);
+
+      } catch (err) {
+          console.error("Error rendering featured collection:", err.message);
+      }
   }
 
   /** Attach add-to-cart and card-click (detail modal) events within a grid */
@@ -361,7 +389,8 @@
       buildNotesRow('Heart', product.heartNotes) +
       buildNotesRow('Base', product.baseNotes);
 
-    detailModal.querySelector('.detail-modal-img img').src = product.image;
+    // Safely pulls the first image string out of your array or uses the fallback link
+    detailModal.querySelector('.detail-modal-img img').src = Array.isArray(product.image) ? product.image[0] : product.image;
     detailModal.querySelector('.detail-modal-img img').alt = product.name;
     detailModal.querySelector('.detail-modal-img img').onerror = function () {
       this.src = FALLBACK_IMAGE;
@@ -686,3 +715,64 @@
     init();
   }
 })();
+
+
+/** Global Image Auto-Swapping Loop */
+function initAutoImageSwapper(intervalTime = 4000) {
+    if (window.carouselIntervalActive) return;
+    window.carouselIntervalActive = true;
+
+    setInterval(() => {
+        const structuralImages = document.querySelectorAll('.product-carousel-img');
+        
+        structuralImages.forEach(img => {
+            // Safe parsing of the images array from the element data attribute
+            let images;
+            try {
+                images = JSON.parse(img.getAttribute('data-images'));
+            } catch(e) { return; }
+            
+            if (!images || images.length <= 1) return; 
+            
+            let currentIndex = parseInt(img.getAttribute('data-current-index') || '0');
+            currentIndex = (currentIndex + 1) % images.length; 
+            
+            img.style.opacity = 0.4;
+            setTimeout(() => {
+                img.src = images[currentIndex];
+                img.setAttribute('data-current-index', currentIndex);
+                img.style.opacity = 1;
+            }, 200);
+        });
+    }, intervalTime);
+}
+
+/** Global Image Auto-Swapping Loop */
+function initAutoImageSwapper(intervalTime = 4000) {
+    if (window.carouselIntervalActive) return;
+    window.carouselIntervalActive = true;
+
+    setInterval(() => {
+        const structuralImages = document.querySelectorAll('.product-carousel-img');
+        
+        structuralImages.forEach(img => {
+            let images;
+            try {
+                images = JSON.parse(img.getAttribute('data-images'));
+            } catch(e) { return; }
+            
+            if (!images || images.length <= 1) return; // Skip single image cards safely
+            
+            let currentIndex = parseInt(img.getAttribute('data-current-index') || '0');
+            currentIndex = (currentIndex + 1) % images.length; 
+            
+            // Apply smooth crossfade transition
+            img.style.opacity = 0.4;
+            setTimeout(() => {
+                img.src = images[currentIndex];
+                img.setAttribute('data-current-index', currentIndex);
+                img.style.opacity = 1;
+            }, 200);
+        });
+    }, intervalTime);
+}

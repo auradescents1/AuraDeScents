@@ -125,10 +125,14 @@
                   <option value="out-of-stock">Out of Stock</option>
                 </select>
               </div>
+              <div class="form-group checkbox-group" style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
+                  <input type="checkbox" id="product-featured" name="is_featured">
+                  <label for="product-featured" style="font-weight: 500; cursor: pointer;">Feature this product on the homepage</label>
+              </div>
             </div>
             <div class="form-group">
               <label for="newImage">Product Image</label>
-              <input type="file" id="newImage" accept="image/jpeg,image/png,image/webp,image/avif" required>
+              <input type="file" id="newImage" multiple accept="image/jpeg,image/png,image/webp,image/avif" required>
             </div>
             <div class="form-group">
               <label for="newDesc">Description</label>

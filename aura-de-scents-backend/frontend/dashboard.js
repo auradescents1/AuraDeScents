@@ -23,11 +23,17 @@
   const editModal = document.getElementById('editModal');
   const editModalClose = document.getElementById('editModalClose');
   const editProductForm = document.getElementById('editProductForm');
+  // 1. Get the featured checkbox status
+  const isFeaturedCheckbox = document.getElementById('product-featured'); // Ensure this ID matches your HTML checkbox
+  const isFeatured = isFeaturedCheckbox ? isFeaturedCheckbox.checked : false;
+  // 2. Safely capture multiple file uploads as an array
+  const fileInput = addProductForm.querySelector('input[type="file"]');
+  const selectedFiles = fileInput ? Array.from(fileInput.files) : [];
 
   let productsCache = [];
   let ordersCache = [];
   let messagesCache = []; 
-
+  let imageUrls = [];
   // ========== AUTH ==========
 
   function getToken() {
@@ -204,8 +210,12 @@
   }
 
   /** Uploads a File object and returns the hosted image URL. */
-  async function uploadImageIfNeeded(fileInputEl, fallbackUrl) {
-    const file = fileInputEl && fileInputEl.files && fileInputEl.files[0];
+  async function uploadImageIfNeeded(fileInputOrFile, fallbackUrl) {
+    // If it's a raw File object, use it; if it's an HTML Input element, grab its first file
+    const file = fileInputOrFile instanceof File 
+        ? fileInputOrFile 
+        : (fileInputOrFile && fileInputOrFile.files && fileInputOrFile.files[0]);
+
     if (!file) return fallbackUrl || '';
 
     const formData = new FormData();
@@ -232,24 +242,45 @@
     if (submitBtn) submitBtn.disabled = true;
 
     try {
-      const imageInput = document.getElementById('newImage');
-      const imageUrl = await uploadImageIfNeeded(imageInput);
+        const imageInput = document.getElementById('newImage');
+        const selectedFiles = imageInput ? Array.from(imageInput.files) : [];
+        
+        // 1. Check if the product should be featured (make sure this matches your HTML checkbox ID!)
+        const featuredCheckbox = document.getElementById('product-featured');
+        const isFeatured = featuredCheckbox ? featuredCheckbox.checked : false;
 
-      if (!imageUrl) {
-        showToast('Please choose a product image.', 'error');
-        return;
-      }
+        let imageUrls = [];
 
-      const payload = {
-        name: document.getElementById('newName').value.trim(),
-        price: parseFloat(document.getElementById('newPrice').value),
-        description: document.getElementById('newDesc').value.trim(),
-        image: imageUrl,
-        status: document.getElementById('newStatus').value,
-        topNotes: document.getElementById('newTopNotes').value.trim(),
-        heartNotes: document.getElementById('newHeartNotes').value.trim(),
-        baseNotes: document.getElementById('newBaseNotes').value.trim(),
-      };
+        if (selectedFiles.length > 0) {
+            // 2. Loop through all selected images and upload them
+            imageUrls = await Promise.all(selectedFiles.map(async (file) => {
+                // Creating a simulated input object or modifying uploadIfNeeded if it expects an input element
+                // If your uploadIfNeeded function can just take a single file, adjust accordingly.
+                return await uploadImageIfNeeded(file); 
+            }));
+        } else {
+            // Use global fallback constant if no files are chosen
+            imageUrls = [FALLBACK_IMAGE]; 
+        }
+
+        // Validate that we actually got images back (unless you want to rely entirely on the fallback)
+        if (imageUrls.length === 0 || imageUrls.includes(undefined)) {
+            showToast('Please choose a valid product image.', 'error');
+            return;
+        }
+
+        // 3. Build the payload matching your new Supabase array & boolean schema
+        const payload = {
+            name: document.getElementById('newName').value.trim(),
+            price: parseFloat(document.getElementById('newPrice').value),
+            description: document.getElementById('newDesc').value.trim(),
+            image: imageUrls, // Now sending the clean array [url1, url2]
+            is_featured: isFeatured, // Sending the boolean toggle
+            status: document.getElementById('newStatus').value,
+            topNotes: document.getElementById('newTopNotes').value.trim(),
+            heartNotes: document.getElementById('newHeartNotes').value.trim(),
+            baseNotes: document.getElementById('newBaseNotes').value.trim(),
+        };
 
       if (!payload.name || !payload.price || !payload.description) {
         showToast('Please fill in all fields.', 'error');
@@ -301,7 +332,8 @@
     document.getElementById('editTopNotes').value = product.topNotes || '';
     document.getElementById('editHeartNotes').value = product.heartNotes || '';
     document.getElementById('editBaseNotes').value = product.baseNotes || '';
-
+    document.getElementById('editFeatured').checked = !!product.is_featured;
+    
     editModal.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
@@ -327,17 +359,40 @@
     const submitBtn = editProductForm.querySelector('button[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
 
-    try {
-      const payload = {
-        name: document.getElementById('editName').value.trim(),
-        price: parseFloat(document.getElementById('editPrice').value),
-        description: document.getElementById('editDesc').value.trim(),
-        image: document.getElementById('editImage').value.trim(),
-        status: document.getElementById('editStatus').value,
-        topNotes: document.getElementById('editTopNotes').value.trim(),
-        heartNotes: document.getElementById('editHeartNotes').value.trim(),
-        baseNotes: document.getElementById('editBaseNotes').value.trim(),
-      };
+   try {
+        const imageInput = document.getElementById('editImage');
+        const selectedFiles = imageInput ? Array.from(imageInput.files) : [];
+        
+        // 1. Grab the edit form's featured checkbox status
+        const featuredCheckbox = document.getElementById('editFeatured');
+        const isFeatured = featuredCheckbox ? featuredCheckbox.checked : false;
+
+        let imageUrls;
+
+        if (selectedFiles.length > 0) {
+            // 2. Admin uploaded new images -> process them all
+            imageUrls = await Promise.all(selectedFiles.map(async (file) => {
+                return await uploadImageIfNeeded(file); 
+            }));
+        } else {
+            // 3. Keep existing images array if no new files were uploaded.
+            // We find the current product state from your global cache array using the id
+            const existingProduct = productsCache.find(p => String(p.id) === String(id));
+            imageUrls = existingProduct && existingProduct.image ? existingProduct.image : [FALLBACK_IMAGE];
+        }
+
+        // 4. Construct the payload matching your new schema structures
+        const payload = {
+            name: document.getElementById('editName').value.trim(),
+            price: parseFloat(document.getElementById('editPrice').value),
+            description: document.getElementById('editDesc').value.trim(),
+            image: imageUrls,       // Clean array of URLs sent to Supabase
+            is_featured: isFeatured, // Boolean status sent to Supabase
+            status: document.getElementById('editStatus').value,
+            topNotes: document.getElementById('editTopNotes').value.trim(),
+            heartNotes: document.getElementById('editHeartNotes').value.trim(),
+            baseNotes: document.getElementById('editBaseNotes').value.trim(),
+        };
 
       const updated = await apiFetch(`/products/${id}`, {
         method: 'PUT',
