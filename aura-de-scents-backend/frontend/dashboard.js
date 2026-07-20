@@ -363,24 +363,24 @@
 
    try {
         const imageInput = document.getElementById('editImage');
-        const imageUrls = imageInput ? [imageInput.value.trim()] : [FALLBACK_IMAGE];
+        const imageUrls = imageInput && imageInput.value.trim() ? [imageInput.value.trim()] : [FALLBACK_IMAGE];
         
-        // // 1. Grab the edit form's featured checkbox status
-        // const featuredCheckbox = document.getElementById('edit-product-featured');
-        // const isFeatured = featuredCheckbox ? featuredCheckbox.checked : false;
+        // // // 1. Grab the edit form's featured checkbox status
+        // // const featuredCheckbox = document.getElementById('edit-product-featured');
+        // // const isFeatured = featuredCheckbox ? featuredCheckbox.checked : false;
 
 
-        if (selectedFiles.length > 0) {
-            // 2. Admin uploaded new images -> process them all
-            imageUrls = await Promise.all(selectedFiles.map(async (file) => {
-                return await uploadImageIfNeeded(file); 
-            }));
-        } else {
-            // 3. Keep existing images array if no new files were uploaded.
-            // We find the current product state from your global cache array using the id
-            const existingProduct = productsCache.find(p => String(p.id) === String(id));
-            imageUrls = existingProduct && existingProduct.image ? existingProduct.image : [FALLBACK_IMAGE];
-        }
+        // if (selectedFiles.length > 0) {
+        //     // 2. Admin uploaded new images -> process them all
+        //     imageUrls = await Promise.all(selectedFiles.map(async (file) => {
+        //         return await uploadImageIfNeeded(file); 
+        //     }));
+        // } else {
+        //     // 3. Keep existing images array if no new files were uploaded.
+        //     // We find the current product state from your global cache array using the id
+        //     const existingProduct = productsCache.find(p => String(p.id) === String(id));
+        //     imageUrls = existingProduct && existingProduct.image ? existingProduct.image : [FALLBACK_IMAGE];
+        // }
 
         // 4. Construct the payload matching your new schema structures
         const payload = {
