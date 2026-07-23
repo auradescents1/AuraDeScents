@@ -101,7 +101,7 @@ router.post('/', orderLimiter, async (req, res, next) => {
 
         // Format item list for the email
         const itemsListHtml = formattedOrder.items.map(item => 
-          `<li style="margin-bottom: 6px;"><strong>${item.name}</strong> x ${item.quantity} — $${item.price}</li>`
+          `<li style="margin-bottom: 6px;"><strong>${item.name}</strong> x ${item.quantity} — ${item.price}</li>`
         ).join('');
 
         const emailHtml = `
@@ -127,7 +127,7 @@ router.post('/', orderLimiter, async (req, res, next) => {
         sendNotificationEmail(`New Order #${formattedOrder.id} - $${formattedOrder.productPrice}`, emailHtml);
 
         return res.status(201).json(formattedOrder);
-    res.status(201).json(rowToOrder(orderRows[0], itemRows));
+    //res.status(201).json(rowToOrder(orderRows[0], itemRows));
   } catch (err) {
     await client.query('ROLLBACK');
     next(err);

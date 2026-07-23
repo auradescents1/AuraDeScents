@@ -536,7 +536,7 @@ h1, h2, h3, h4, h5 {
 .product-card-img img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.7s var(--transition-smooth);
 }
 
@@ -846,7 +846,7 @@ h1, h2, h3, h4, h5 {
 .detail-modal-img img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   position: absolute;
   inset: 0;
 }
