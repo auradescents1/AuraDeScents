@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const { pool } = require('../db');
 const { requireAdmin } = require('../middleware/auth');
+const { sendNotificationEmail } = require('../lib/mailer');
 
 const router = express.Router();
 
@@ -92,10 +93,40 @@ router.post('/', orderLimiter, async (req, res, next) => {
       );
     }
 
-    await client.query('COMMIT');
+   await client.query('COMMIT');
 
-    const { rows: orderRows } = await pool.query('SELECT * FROM orders WHERE id = $1', [orderId]);
-    const { rows: itemRows } = await pool.query('SELECT * FROM order_items WHERE order_id = $1', [orderId]);
+        const { rows: orderRows } = await pool.query('SELECT * FROM orders WHERE id = $1', [orderId]);
+        const { rows: itemRows } = await pool.query('SELECT * FROM order_items WHERE order_id = $1', [orderId]);
+        const formattedOrder = rowToOrder(orderRows[0], itemRows);
+
+        // Format item list for the email
+        const itemsListHtml = formattedOrder.items.map(item => 
+          `<li style="margin-bottom: 6px;"><strong>${item.name}</strong> x ${item.quantity} — $${item.price}</li>`
+        ).join('');
+
+        const emailHtml = `
+          <div style="font-family: Arial, sans-serif; padding: 20px; background: #0f0f0f; color: #eaeaea;">
+            <div style="max-width: 550px; margin: 0 auto; border: 1px solid #333; padding: 24px; border-radius: 8px; background: #161616;">
+              <h2 style="color: #cda45e; margin-top: 0;">🛍️ New Order Placed!</h2>
+              <p><strong>Order ID:</strong> #${formattedOrder.id}</p>
+              <p><strong>Customer:</strong> ${formattedOrder.customerName}</p>
+              <p><strong>Email:</strong> ${formattedOrder.email}</p>
+              <p><strong>Primary Phone:</strong> ${formattedOrder.phone1}</p>
+              ${formattedOrder.phone2 ? `<p><strong>Secondary Phone:</strong> ${formattedOrder.phone2}</p>` : ''}
+              <p><strong>Delivery Address:</strong> ${formattedOrder.address}</p>
+              <p><strong>Total Price:</strong> <span style="color: #cda45e; font-size: 1.2rem; font-weight: bold;">$${formattedOrder.productPrice}</span></p>
+              <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;" />
+              <h4 style="color: #fff; margin-bottom: 8px;">Ordered Items:</h4>
+              <ul style="padding-left: 20px; color: #ccc;">
+                ${itemsListHtml}
+              </ul>
+            </div>
+          </div>
+        `;
+
+        sendNotificationEmail(`New Order #${formattedOrder.id} - $${formattedOrder.productPrice}`, emailHtml);
+
+        return res.status(201).json(formattedOrder);
     res.status(201).json(rowToOrder(orderRows[0], itemRows));
   } catch (err) {
     await client.query('ROLLBACK');
