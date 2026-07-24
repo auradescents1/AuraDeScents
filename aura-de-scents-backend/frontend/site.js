@@ -276,7 +276,8 @@
             
             <div class="product-details" style="padding: 15px;">
                 <h3 class="product-title">${product.name || 'Unnamed Product'}</h3>
-                <p class="product-price">${product.price || '0.00'}</p>
+                <p class="product-price">Rs.  ${product.price || '0.00'}/-</p>
+                <p><del style="font: normal small-caps bold 12px/30px Georgia, serif;">Rs. 4,000</del> -33%</p>
             </div>
         </article>
     `;
@@ -404,6 +405,7 @@
     detailModal.querySelector('.detail-badge').classList.toggle('out', !inStock);
     detailModal.querySelector('.detail-modal-name').textContent = product.name;
     detailModal.querySelector('.detail-modal-price').textContent = `${product.price.toLocaleString()}`;
+    
     detailModal.querySelector('.detail-modal-desc').textContent = product.description;
 
     const notesBlock = detailModal.querySelector('.notes-pyramid');
